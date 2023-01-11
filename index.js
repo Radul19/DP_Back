@@ -30,6 +30,8 @@ app.listen(PORT, () => {
 const generateID = () => Math.random().toString(36).substring(2, 10);
 let chatRooms = [];
 
+export default app
+
 // socketIO.on("connection", (socket) => {
 // 	console.log(`⚡: ${socket.id} user just connected!`);
 
