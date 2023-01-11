@@ -1,13 +1,16 @@
-import { Router } from "express"
-import userFunc from "../controllers/user"
+// import { Router } from "express"
+// import userFunc from "../controllers/user"
+const { Router } = require("express")
+const userFunc = require("../controllers/user")
 
 const router = Router()
 
-const {test,register,login} = userFunc
+const { test, register, login } = userFunc
 
-router.get('/',test)
-router.post('/register',register)
-router.post('/login',login)
+router.get('/', test)
+router.post('/register', register)
+router.post('/login', login)
 
 
-export default router
+// export default router
+module.exports = router
