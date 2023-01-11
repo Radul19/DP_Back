@@ -1,4 +1,5 @@
-import { connect } from 'mongoose'
+// import { connect } from 'mongoose'
+const { connect } = require('mongoose')
 // import dotenv from 'dotenv'
 // dotenv.config()
 

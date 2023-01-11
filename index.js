@@ -1,9 +1,14 @@
-import express from 'express'
-import server from 'http'
-import cors from 'cors'
-import userFunc from './src/controllers/user'
-import userRoutes from './src/routes/user.routes'
-import './db'
+// import express from 'express'
+// import server from 'http'
+// import cors from 'cors'
+// import userFunc from './src/controllers/user'
+// import userRoutes from './src/routes/user.routes'
+// import './db'
+const express = require('express')
+const server = require('http')
+const cors = require('cors')
+const userRoutes = require('./src/routes/user.routes')
+require('./db')
 
 const PORT = 4000;
 const app = express()
@@ -17,7 +22,7 @@ const http = server.Server(app)
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors({
-	origin: "*",
+    origin: "*",
 }));
 
 app.use(userRoutes);
@@ -30,7 +35,7 @@ app.listen(PORT, () => {
 const generateID = () => Math.random().toString(36).substring(2, 10);
 let chatRooms = [];
 
-export default app
+module.exports = app
 
 // socketIO.on("connection", (socket) => {
 // 	console.log(`⚡: ${socket.id} user just connected!`);

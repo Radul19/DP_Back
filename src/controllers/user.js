@@ -1,5 +1,7 @@
-import bcrypt from 'bcrypt'
-import { User } from "../models/userSchema";
+// import bcrypt from 'bcrypt'
+// import { User } from "../models/userSchema";
+const bcrypt = require('bcrypt')
+const { User } = require("../models/userSchema")
 const saltRounds = 10;
 const userFunc = {}
 
@@ -71,5 +73,5 @@ userFunc.login = async (req, res) => {
     // res.send('hey')
 
 }
-
-export default userFunc
+module.exports = userFunc
+// export default userFunc

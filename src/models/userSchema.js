@@ -1,5 +1,5 @@
-
-import { Schema, model } from "mongoose"
+const { Schema ,model } = require('mongoose')
+// import { Schema, model } from "mongoose"
 
 const UserSchema = new Schema(
     {
@@ -23,6 +23,6 @@ UserSchema.methods.presignedProfile = async function () {
     return this
 }
 
-export const User = model("User", UserSchema);
+// export const User = model("User", UserSchema);
 
-// module.exports = model('User', UserSchema)
+module.exports = model('User', UserSchema)
