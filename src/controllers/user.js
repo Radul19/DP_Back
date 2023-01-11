@@ -1,7 +1,7 @@
 // import bcrypt from 'bcrypt'
 // import { User } from "../models/userSchema";
 const bcrypt = require('bcrypt')
-const { User } = require("../models/userSchema")
+const User = require("../models/userSchema")
 const saltRounds = 10;
 const userFunc = {}
 
