@@ -5,37 +5,46 @@
 // import userRoutes from './src/routes/user.routes'
 // import './db'
 const express = require('express')
-const server = require('http')
+// const server = require('http')
 const cors = require('cors')
 const userRoutes = require('./src/routes/user.routes')
+const authRoutes = require('./src/routes/authorization.routes')
+const socketAdmin = require('./src/controllers/socketAdmin')
 require('./db')
 
 const PORT = 4000;
-const app = express()
-const http = server.Server(app)
-// const socketIO = require("socket.io")(http, {
-// 	cors: {
-// 		origin: "*",
-// 	},
-// });
+// const app = express()
+// const http = server.Server(app)
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+const app = require('express')();
+const server = require('http').createServer(app);
+const io = require('socket.io')(server);
+io.on('connection', () => { /* … */ });
+
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json({ limit: '50mb' }));
 app.use(cors({
     origin: "*",
 }));
 
 app.use(userRoutes);
+app.use(authRoutes);
 
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Example app listening on port ${PORT}`)
 })
+// app.listen(PORT, () => {
+//     console.log(`Example app listening on port ${PORT}`)
+// })
 
 const generateID = () => Math.random().toString(36).substring(2, 10);
 let chatRooms = [];
 
 module.exports = app
+
+io.on("connection", socketAdmin)
+// console.log(socketAdmin())
 
 // socketIO.on("connection", (socket) => {
 // 	console.log(`⚡: ${socket.id} user just connected!`);
