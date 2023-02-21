@@ -2,6 +2,7 @@ const { Schema, model } = require('mongoose')
 // import { Schema, model } from "mongoose"
 
 /** USER_TYPE = 0,1,2,3,4 */
+/** -1 = Baneado */
 /** 0 = desabilitado */
 /** 1 = onRegister */
 /** 2 = Normal user */
@@ -30,7 +31,7 @@ const UserSchema = new Schema(
         profile_pic_id: { type: String, required: true, default: '_' },
         description: { type: String, required: false },
         default_place: { type: String, required: false },
-        delivery_status: { type: Number, required: true, default: 4 },
+        delivery_status: { type: Number, required: true, default: 3 },
     },
     {
         timestamps: true,

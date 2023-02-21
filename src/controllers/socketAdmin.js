@@ -8,6 +8,7 @@ const socketAdmin = (socket) => {
         console.log(data)
     })
 
+    /** users = [userData._id, deli_id] */
     socket.on('find_chat', async (users) => {
         console.log('#socket-find_chat')
         try {
@@ -19,7 +20,7 @@ const socketAdmin = (socket) => {
                 socket.join(result._id)
                 socket.emit('found_chat', { chat: result, status: 200 })
             } else {
-                const newChat = new Chat({ participants: users })
+                const newChat = new Chat({ participants: users, delivery_id: users[1] })
                 await newChat.save()
                 let chatoSend = await newChat.populate('participants')
                 socket.join(newChat._id)
@@ -39,7 +40,6 @@ const socketAdmin = (socket) => {
 
     socket.on('add_message', async ({ chat_id, new_message }) => {
         console.log('#socket-add_message')
-        console.log(new_message)
         const result = await Chat.findOneAndUpdate({ _id: chat_id }, {
             $push: {
                 messages: {
@@ -51,6 +51,23 @@ const socketAdmin = (socket) => {
         socket.broadcast.emit('update_messages', result)
 
     })
+
+    socket.on('toggleTracking', async ({
+        state, chat_id
+    }) => {
+        console.log('#toggleTracking')
+        await Chat.findOneAndUpdate({ _id: chat_id }, { live_sharing: state })
+        socket.broadcast.emit('update_tracking', state)
+    })
+
+    socket.on('delivery_pos',async(position)=>{
+        socket.broadcast.emit('update_delivery_pos', position)
+    })
+
+    socket.on("disconnect", () => {
+        socket.disconnect();
+        console.log("🔥: A user disconnected");
+    });
 
 }
 

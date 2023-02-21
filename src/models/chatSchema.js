@@ -9,7 +9,19 @@ const ChatSchema = new Schema(
             text: String,
             owner: String,
             timestamp: { type: Date, default: Date.now() },
+            map: { type: Boolean, default: false },
+            origin: {
+                latitude: Number,
+                longitude: Number
+            },
+            destination: {
+                latitude: Number,
+                longitude: Number
+            }
         }],
+        delivery_id: String,
+        live_sharing: { type: Boolean, default: false },
+
     },
     {
         timestamps: true,

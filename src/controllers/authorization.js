@@ -1,7 +1,7 @@
 
 const User = require("../models/userSchema")
 const cloudinary = require('cloudinary')
-const { UserRequests } = require("../models/requestSchema")
+const { UserRequests, Complaints } = require("../models/requestSchema")
 cloudinary.config({
     cloud_name: 'deliveryplanet',
     api_key: '317699299852547',
@@ -62,7 +62,6 @@ autho.getUserRequests = async (req, res) => {
 
     try {
         const results = await UserRequests.find().populate('user_data')
-        console.log(results)
 
         if (results) {
             res.send(results)
@@ -80,13 +79,45 @@ autho.getUserRequests = async (req, res) => {
 
 }
 
+autho.getComplaints = async (req,res)=>{
+    console.log('#auth-getComplaints')
+    try {
+        const result = await Complaints.find().populate('creator target')
+        res.send(result)
+    } catch (error) {
+        res.status(500).json({
+            msg: 'Error inesperado'
+        })
+    }
+}
+
+autho.complaintAction = async (req, res) => {
+    console.log('#auth-complaintAction')
+    try {
+        const { complaint_id, action, target_id } = req.body
+
+        if (action) {
+            await User.findOneAndUpdate({ _id: target_id }, { user_type: -1 })
+            await Complaints.findOneAndDelete({ _id: complaint_id })
+        } else {
+            await Complaints.deleteMany({ target: target_id })
+        }
+        res.send({ ok: true })
+
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({
+            msg: 'Error inesperado'
+        })
+    }
+}
 autho.userRequestAction = async (req, res) => {
     console.log('#auth-userRequestAction')
     try {
         const { user_id, num } = req.body
 
         const result = await User.findOneAndUpdate({ _id: user_id }, { user_type: num })
-        await UserRequests.findOneAndDelete({ user_data: user_id })
+        // await UserRequests.findOneAndDelete({ user_data: user_id })
 
         if (result) {
             res.json({ ok: true })

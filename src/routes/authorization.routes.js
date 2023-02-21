@@ -5,10 +5,12 @@ const authFunc = require("../controllers/authorization")
 
 const router = Router()
 
-const { getUserRequests,userRequestAction } = authFunc
+const { getUserRequests, userRequestAction,complaintAction,getComplaints } = authFunc
 
 router.get('/getUserRequests', getUserRequests)
 router.post('/userRequestAction', userRequestAction)
+router.post('/complaintAction', complaintAction)
+router.get('/getComplaints', getComplaints)
 
 
 // export default router

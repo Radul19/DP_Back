@@ -3,7 +3,7 @@
 const bcrypt = require('bcrypt')
 const User = require("../models/userSchema")
 const Chat = require("../models/chatSchema")
-const { UserRequests } = require("../models/requestSchema")
+const { UserRequests, Complaints } = require("../models/requestSchema")
 const saltRounds = 10;
 const userFunc = {}
 
@@ -26,8 +26,12 @@ const blackbox = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABEgAAACjCAYAAACZ
 //   function(error, result) {console.log(result); });
 
 userFunc.test = (req, res) => {
-    console.log('hey')
-    res.send('hey')
+    // console.log('hey')
+    const text = 'Usuario de prueba'
+    const result = text.replaceAll(' ',"|")
+    console.log(new RegExp(text, "i"))
+    console.log(new RegExp(result,'i'))
+    res.send(result)
 }
 userFunc.deleteAll = async (req, res) => {
     await User.collection.drop()
@@ -110,7 +114,6 @@ userFunc.register = async (req, res) => {
 
 }
 
-
 userFunc.login = async (req, res) => {
     console.log('#user-login')
 
@@ -119,9 +122,13 @@ userFunc.login = async (req, res) => {
     if (finduser) {
         bcrypt.compare(password, finduser.password, async (err, result) => {
             if (result) {
-                if (finduser.user_type === 0) {
+                if(finduser.user_type === -1){
+                    res.status(401).json({
+                        msg: 'Su cuenta ha sido deshabilitada, contacte a un administrador para mas información'
+                    })
+                }else if (finduser.user_type === 0) {
                     console.log('userDeleted')
-                    // await User.findOneAndDelete({ _id: finduser._id })
+                    await User.findOneAndDelete({ _id: finduser._id })
                     res.status(401).json({
                         msg: 'Su petición de registro ha sido rechazada'
                     })
@@ -152,6 +159,7 @@ userFunc.login = async (req, res) => {
 
 userFunc.getDeliverys = async (req,res)=>{
     console.log('#user-getDeliverys')
+    
     const retrieve ={
         name:1,
         second_name:1,
@@ -160,9 +168,15 @@ userFunc.getDeliverys = async (req,res)=>{
         delivery_status:1,
     }
     try {
-        // const {filters} = req.body
-        const result = await User.find({delivery_status:{$lt:3} },retrieve)
-        // console.log(result)
+        const {place,status,text} = req.body
+        const newText = text.replaceAll(' ','|')
+        const query = {
+            $or: [{ name: text ? new RegExp(newText, "i") : { $exists: true } }, { second_name: text ? new RegExp(newText, "i") : { $exists: true }, }],
+            delivery_status:{$lt:3},
+            user_type:{$gte:3}
+        }
+        
+        const result = await User.find(query,retrieve)
         if(result){
             if(result.length < 1){
                 res.status(204)
@@ -174,6 +188,7 @@ userFunc.getDeliverys = async (req,res)=>{
         }
         
     } catch (error) {
+        console.log(error.message)
         res.status(500).json({
             msg: 'Error inesperado'
         })
@@ -233,6 +248,63 @@ userFunc.getMyChat = async (req,res)=>{
         console.log(error.message)
         res.status(500).json({
             msg: 'Error inesperado'
+        })
+    }
+
+}
+
+
+userFunc.changePfp = async (req,res)=>{
+    console.log('#user-changePfp')
+    try {
+
+        const {base64,user_id,old_pfp} = req.body
+        if(old_pfp !== "_"){
+            cloudinary.v2.uploader.destroy(old_pfp,{})
+        }
+        
+        const { secure_url: profile_pic, public_id: profile_pic_id } = await cloudinary.uploader.upload(base64, {})
+        await User.findOneAndUpdate({_id:user_id},{profile_pic,profile_pic_id})
+        res.send({profile_pic,profile_pic_id})
+
+
+        
+    } catch (error) {
+        console.log(error.message)
+        res.status(404).json({
+            msg: 'Correo incorrecto'
+        })
+    }
+
+}
+
+
+
+userFunc.createComplaint = async (req,res)=>{
+    console.log('#user-createComplaint')
+
+    try {
+        const {images,...complaintData} = req.body
+
+  
+        const proofs = await Promise.all(
+            images.map(async (image) => {
+                if(image){
+                    const { secure_url: pic_url, public_id: pic_id } = await cloudinary.uploader.upload(image, {})
+                  return {pic_url,pic_id}
+                }
+            })
+          )
+        console.log(proofs)
+        
+        const newComplaint = new Complaints({...complaintData,proofs})
+        await newComplaint.save()
+        res.send({ok:true})
+
+    } catch (error) {
+        console.log(error.message)
+        res.status(404).json({
+            msg: 'Correo incorrecto'
         })
     }
 
