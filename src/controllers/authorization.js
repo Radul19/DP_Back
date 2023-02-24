@@ -79,7 +79,7 @@ autho.getUserRequests = async (req, res) => {
 
 }
 
-autho.getComplaints = async (req,res)=>{
+autho.getComplaints = async (req, res) => {
     console.log('#auth-getComplaints')
     try {
         const result = await Complaints.find().populate('creator target')
@@ -134,6 +134,56 @@ autho.userRequestAction = async (req, res) => {
     }
 }
 
+autho.getUsers = async (req, res) => {
+    console.log('#auth-getUsers')
+    try {
+        const retrieve = {
+            password: 0,
+            card_pic_id: 0,
+            profile_pic_id: 0,
+            createdAt: 0,
+            updatedAt: 0,
+        }
+        const { text } = req.body
+        const newText = text.replaceAll(' ', '|')
+        const query = {
+            $or: [{ name: text.length > 0 ? new RegExp(newText, "i") : { $exists: true } }, { second_name: text.length > 0 ? new RegExp(newText, "i") : { $exists: true }, }],
+        }
+
+        const result = await User.find(query, retrieve)
+        if (result) {
+            if (result.length < 1) {
+                res.status(204)
+            } else {
+                res.send(result)
+            }
+        } else {
+            res.status(409).json({ msg: 'No se ha podido obtener la informacion' })
+        }
+
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({
+            msg: 'Error inesperado'
+        })
+    }
+}
+
+autho.updateUserInfo = async (req, res) => {
+    console.log('#auth-updateUserInfo')
+    try {
+        console.log(req.body)
+        const { _id, place, card_pic, profile_pic, ...newValues } = req.body
+        await User.findOneAndUpdate({ _id }, { ...newValues })
+        res.send({ ok: true })
+
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({
+            msg: 'Error inesperado'
+        })
+    }
+}
 // autho.approveUser = (req, res) => {
 //     const { user_id } = req.body
 

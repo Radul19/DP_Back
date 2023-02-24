@@ -62,10 +62,10 @@ userFunc.register = async (req, res) => {
         /// START REGISTER
 
         /// CARD IMAGES
-        const { secure_url: card_url, public_id: card_pic_id } = await cloudinary.uploader.upload(card_pic, {})
-
+        
         const password = await bcrypt.hash(passOld, saltRounds)
         if (!admin_bool) {
+            const { secure_url: card_url, public_id: card_pic_id } = await cloudinary.uploader.upload(card_pic, {})
             /// register user
 
             /// SELFIE IMAGES
@@ -92,8 +92,6 @@ userFunc.register = async (req, res) => {
                 const newuser = new User({
                     ...userdata, password,
                     user_type: 4,
-                    card_pic: card_url,
-                    card_pic_id: card_pic_id
                 })
                 await newuser.save()
                 return res.json({ ok: true })
@@ -117,7 +115,7 @@ userFunc.register = async (req, res) => {
 userFunc.login = async (req, res) => {
     console.log('#user-login')
 
-    const { email, password } = req.body
+    const { email, password,location } = req.body
     const finduser = await User.findOne({ email })
     if (finduser) {
         bcrypt.compare(password, finduser.password, async (err, result) => {
@@ -138,6 +136,7 @@ userFunc.login = async (req, res) => {
                         msg: 'Su petición de registro esta en revisión'
                     })
                 } else {
+                    await User.findOneAndUpdate({email},{place:location})
                     res.send(finduser)
                 }
             } else {
@@ -166,14 +165,19 @@ userFunc.getDeliverys = async (req,res)=>{
         email:1,
         profile_pic:1,
         delivery_status:1,
+        place:1,
     }
     try {
-        const {place,status,text} = req.body
+        const {place,del_status,text} = req.body
+        console.log(place)
         const newText = text.replaceAll(' ','|')
         const query = {
             $or: [{ name: text ? new RegExp(newText, "i") : { $exists: true } }, { second_name: text ? new RegExp(newText, "i") : { $exists: true }, }],
-            delivery_status:{$lt:3},
-            user_type:{$gte:3}
+            delivery_status:del_status ? del_status :{$lt:3},
+            user_type:{$gte:3},
+            "place.country": place.country ? place.country : { $exists: true },
+            "place.state": place.state ? place.state : { $exists: true },
+            "place.city": place.city ? place.city : { $exists: true },
         }
         
         const result = await User.find(query,retrieve)
@@ -295,7 +299,6 @@ userFunc.createComplaint = async (req,res)=>{
                 }
             })
           )
-        console.log(proofs)
         
         const newComplaint = new Complaints({...complaintData,proofs})
         await newComplaint.save()

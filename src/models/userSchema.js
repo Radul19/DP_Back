@@ -22,8 +22,8 @@ const UserSchema = new Schema(
         name: { type: String, required: true },
         email: { type: String, required: true },
         card_id: { type: String, required: true },
-        card_pic: { type: String, required: true },
-        card_pic_id: { type: String, required: true },
+        card_pic: { type: String, required: true, default: '_' },
+        card_pic_id: { type: String, required: true, default: '_' },
         password: { type: String, required: true },
         user_type: { type: Number, required: true },
         second_name: { type: String, required: true },
@@ -32,6 +32,11 @@ const UserSchema = new Schema(
         description: { type: String, required: false },
         default_place: { type: String, required: false },
         delivery_status: { type: Number, required: true, default: 3 },
+        place: {
+            country: { type: String, default: "Venezuela" },
+            state: { type: String, default: "" },
+            city: { type: String, default: "" },
+        }
     },
     {
         timestamps: true,
