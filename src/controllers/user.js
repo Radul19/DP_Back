@@ -169,21 +169,23 @@ userFunc.getDeliverys = async (req,res)=>{
     }
     try {
         const {place,del_status,text} = req.body
-        console.log(place)
         const newText = text.replaceAll(' ','|')
+        console.log(del_status)
         const query = {
             $or: [{ name: text ? new RegExp(newText, "i") : { $exists: true } }, { second_name: text ? new RegExp(newText, "i") : { $exists: true }, }],
-            delivery_status:del_status ? del_status :{$lt:3},
+            delivery_status:del_status === false ? {$lt:3} :del_status,
             user_type:{$gte:3},
             "place.country": place.country ? place.country : { $exists: true },
             "place.state": place.state ? place.state : { $exists: true },
             "place.city": place.city ? place.city : { $exists: true },
         }
+            console.log(query)
         
         const result = await User.find(query,retrieve)
+        console.log(result)
         if(result){
             if(result.length < 1){
-                res.status(204)
+                res.status(204).json({msg:'No se han encontrado resultados'})
             }else{
                 res.send(result)
             }
