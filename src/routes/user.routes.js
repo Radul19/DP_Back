@@ -5,7 +5,7 @@ const userFunc = require("../controllers/user")
 
 const router = Router()
 
-const { test, register, login, deleteAll, getDeliverys, changeDeliStatus, getMessages, getMyChat,changePfp,createComplaint } = userFunc
+const { test, register, login, deleteAll, getDeliverys, changeDeliStatus, getMessages, getMyChat, changePfp, createComplaint, deleteChat } = userFunc
 
 router.get('/', test)
 router.get('/deleteAll', deleteAll)
@@ -17,6 +17,7 @@ router.post('/getMessages', getMessages)
 router.post('/getMyChat', getMyChat)
 router.post('/changePfp', changePfp)
 router.post('/createComplaint', createComplaint)
+router.post('/deleteChat', deleteChat)
 
 
 // export default router

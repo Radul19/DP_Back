@@ -21,6 +21,7 @@ const ChatSchema = new Schema(
         }],
         delivery_id: String,
         live_sharing: { type: Boolean, default: false },
+        views: [String]
 
     },
     {

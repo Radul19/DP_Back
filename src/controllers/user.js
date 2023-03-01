@@ -170,7 +170,6 @@ userFunc.getDeliverys = async (req,res)=>{
     try {
         const {place,del_status,text} = req.body
         const newText = text.replaceAll(' ','|')
-        console.log(del_status)
         const query = {
             $or: [{ name: text ? new RegExp(newText, "i") : { $exists: true } }, { second_name: text ? new RegExp(newText, "i") : { $exists: true }, }],
             delivery_status:del_status === false ? {$lt:3} :del_status,
@@ -179,10 +178,8 @@ userFunc.getDeliverys = async (req,res)=>{
             "place.state": place.state ? place.state : { $exists: true },
             "place.city": place.city ? place.city : { $exists: true },
         }
-            console.log(query)
         
         const result = await User.find(query,retrieve)
-        console.log(result)
         if(result){
             if(result.length < 1){
                 res.status(204).json({msg:'No se han encontrado resultados'})
@@ -243,7 +240,7 @@ userFunc.getMyChat = async (req,res)=>{
     console.log('#user-getMyChat')
     try {
         const {user_id} = req.body
-        const result = await Chat.find({participants:{$in:[user_id]}},{participants:1}).populate('participants')
+        const result = await Chat.find({views:{$in:[user_id]}},{participants:1}).populate('participants')
         if(result){
             res.send(result)
         }else{
@@ -310,6 +307,23 @@ userFunc.createComplaint = async (req,res)=>{
         console.log(error.message)
         res.status(404).json({
             msg: 'Correo incorrecto'
+        })
+    }
+
+}
+userFunc.deleteChat = async (req,res)=>{
+    console.log('#user-deleteChat')
+    try {
+        const {chat_id,user_id} = req.body
+
+        const result = await Chat.findOneAndUpdate({_id:chat_id},{$pull:{views:user_id}})
+        console.log(result)
+        res.send({ok:true})
+
+        
+    } catch (error) {
+        res.status(404).json({
+            msg: 'No se ha podido eliminar el chat, intente nuevamente'
         })
     }
 

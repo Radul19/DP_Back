@@ -18,9 +18,12 @@ const socketAdmin = (socket) => {
             // console.log(result)
             if (result) {
                 socket.join(result._id)
+                if (!(result.views.some((item) => item === users[0]))){
+                    await Chat.findOneAndUpdate({ participants: { $all: users } }, { $push: { views: users[0] } })
+                }
                 socket.emit('found_chat', { chat: result, status: 200 })
             } else {
-                const newChat = new Chat({ participants: users, delivery_id: users[1] })
+                const newChat = new Chat({ participants: users, delivery_id: users[1], views: users })
                 await newChat.save()
                 let chatoSend = await newChat.populate('participants')
                 socket.join(newChat._id)
@@ -60,7 +63,7 @@ const socketAdmin = (socket) => {
         socket.broadcast.emit('update_tracking', state)
     })
 
-    socket.on('delivery_pos',async(position)=>{
+    socket.on('delivery_pos', async (position) => {
         socket.broadcast.emit('update_delivery_pos', position)
     })
 
